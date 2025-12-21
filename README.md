@@ -86,9 +86,6 @@ This project leverages the power of distributed computing provided by GitHub Act
 ![googlesheet1](image/6job.png)
 
 
-![googlesheet1](image/6job2.png)
-
-
 ![googlesheet1](image/6job3.png)
 
 
