@@ -20,6 +20,7 @@ class StockNotifier:
         return now_utc8.strftime("%Y-%m-%d %H:%M:%S")
 
     def send_telegram(self, message):
+        """發送 Telegram 即時簡報"""
         if not self.tg_token or not self.tg_chat_id:
             return False
         ts = self.get_now_time_str().split(" ")[1]
@@ -34,7 +35,7 @@ class StockNotifier:
 
     def send_stock_report(self, market_name, img_data, report_df, text_reports, stats=None):
         """
-        🚀 專業版更新：包含智慧快取統計、九張圖表、以及「動態市場平台」提示功能
+        🚀 專業版更新：整合智慧快取統計、六國專業平台跳轉與動能矩陣圖
         """
         if not self.resend_api_key:
             print("⚠️ 缺少 Resend API Key，無法寄信。")
@@ -48,26 +49,20 @@ class StockNotifier:
         fail_count = stats.get('fail', 0) if stats else 0
         success_rate = f"{(success_count/total_count)*100:.1f}%" if isinstance(total_count, (int, float)) and total_count > 0 else "N/A"
 
-        # --- 💡 智慧匹配平台名稱 (對接 analyzer.py 邏輯) ---
+        # --- 💡 智慧匹配平台名稱 (同步對接 analyzer.py 之 get_market_url 邏輯) ---
         m_id = market_name.lower()
         if "us" in m_id:
-            platform_name = "StockCharts"
-            platform_url = "https://stockcharts.com/"
+            p_name, p_url = "StockCharts", "https://stockcharts.com/"
         elif "hk" in m_id:
-            platform_name = "AASTOCKS 阿思達克"
-            platform_url = "http://www.aastocks.com/"
+            p_name, p_url = "AASTOCKS 阿思達克", "http://www.aastocks.com/"
         elif "cn" in m_id:
-            platform_name = "東方財富網"
-            platform_url = "https://www.eastmoney.com/"
+            p_name, p_url = "東方財富網 (EastMoney)", "https://www.eastmoney.com/"
         elif "jp" in m_id:
-            platform_name = "樂天證券 (Rakuten)"
-            platform_url = "https://www.rakuten-sec.co.jp/"
+            p_name, p_url = "樂天證券 (Rakuten)", "https://www.rakuten-sec.co.jp/"
         elif "kr" in m_id:
-            platform_name = "Naver Finance"
-            platform_url = "https://finance.naver.com/"
+            p_name, p_url = "Naver Finance", "https://finance.naver.com/"
         else:
-            platform_name = "玩股網 (WantGoo)"
-            platform_url = "https://www.wantgoo.com/"
+            p_name, p_url = "玩股網 (WantGoo)", "https://www.wantgoo.com/"
 
         # --- 2. 構建 HTML 內容 ---
         html_content = f"""
@@ -94,12 +89,12 @@ class StockNotifier:
 
                 <p style="background-color: #fff9db; padding: 12px; border-left: 4px solid #fcc419; font-size: 14px; color: #666; margin: 20px 0;">
                     💡 <b>提示：</b>下方的數據報表若包含股票代號，點擊可直接跳轉至 
-                    <a href="{platform_url}" target="_blank" style="color: #e67e22; text-decoration: none; font-weight: bold;">{platform_name}</a> 
+                    <a href="{p_url}" target="_blank" style="color: #e67e22; text-decoration: none; font-weight: bold;">{p_name}</a> 
                     查看該市場之即時技術線圖。
                 </p>
         """
 
-        # --- 3. 核心：插入九張核心動能圖表 ---
+        # --- 3. 插入九張矩陣圖表 ---
         html_content += "<div style='margin-top: 30px;'>"
         for img in img_data:
             html_content += f"""
@@ -110,13 +105,13 @@ class StockNotifier:
             """
         html_content += "</div>"
 
-        # --- 4. 插入文字報酬明細 ---
+        # --- 4. 插入文字報酬分布明細 (對應 analyzer.py 分箱邏輯) ---
         html_content += "<div style='margin-top: 20px;'>"
         for period, report in text_reports.items():
             p_name = {"Week": "週", "Month": "月", "Year": "年"}.get(period, period)
             html_content += f"""
             <div style="margin-bottom: 20px;">
-                <h4 style="color: #16a085; margin-bottom: 8px;">📊 {p_name} 報酬分布明細</h4>
+                <h4 style="color: #16a085; margin-bottom: 8px;">📊 {p_name} K線 最高-進攻 報酬分布明細</h4>
                 <pre style="background-color: #2d3436; color: #dfe6e9; padding: 15px; border-radius: 5px; font-size: 12px; white-space: pre-wrap; font-family: 'Courier New', monospace;">{report}</pre>
             </div>
             """
@@ -124,14 +119,14 @@ class StockNotifier:
 
         html_content += """
                 <p style="margin-top: 40px; font-size: 11px; color: #999; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
-                    此郵件由 Global Stock Monitor 自動發送。數據僅供參考，不構成投資建議。
+                    此郵件由 Global Stock Monitor 系統自動發送。數據僅供參考，不構成投資建議。
                 </p>
             </div>
         </body>
         </html>
         """
 
-        # --- 5. 準備附件 (Inline Embedding) ---
+        # --- 5. 處理附件 ---
         attachments = []
         for img in img_data:
             try:
@@ -143,20 +138,19 @@ class StockNotifier:
                         "disposition": "inline"
                     })
             except Exception as e:
-                print(f"⚠️ 讀取圖片失敗 {img['path']}: {e}")
+                print(f"⚠️ 讀取圖表失敗 {img['path']}: {e}")
 
-        # --- 6. 執行寄送 ---
+        # --- 6. 寄送 ---
         try:
             resend.Emails.send({
                 "from": "StockMonitor <onboarding@resend.dev>",
                 "to": "grissomlin643@gmail.com",
-                "subject": f"📊 {market_name} 全方位監控報表 - {report_time.split(' ')[0]}",
+                "subject": f"🚀 {market_name} 全方位監控報告 - {report_time.split(' ')[0]}",
                 "html": html_content,
                 "attachments": attachments
             })
-            print(f"✅ {market_name} 專業報表已寄送至電子信箱！")
-            
-            tg_msg = f"📊 <b>{market_name} 監控報表已送達</b>\n數據覆蓋率: {success_rate}\n有效樣本: {success_count} 檔"
+            print(f"✅ {market_name} 報告已寄送！")
+            tg_msg = f"📊 <b>{market_name} 監控報表已送達</b>\n成功率: {success_rate}\n樣本: {success_count} 檔"
             self.send_telegram(tg_msg)
             return True
         except Exception as e:
